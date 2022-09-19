@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <link rel="icon" href="favicon.jpg" sizes="512x512" />
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>
+        <v-container>
+            {{ images.length }} Generated Images
+      <v-row justify="start" no-gutters>
+        <v-col v-for="image in images" cols="auto" class="ma-2">
+          <v-card max-width="215px">
+            <v-dialog max-width="400">
+                <template v-slot:activator="{ on, attrs }">
+                <a v-bind="attrs" v-on="on">
+                    <v-img :src=`/images/${image.id}.webp` contain class="grey darken-4"></v-img>
+                </a>
+                </template>
+                <template v-slot:default="dialog">
+                <v-card>
+                    <v-img :src=`/images/${image.id}.webp` contain class="grey darken-4"></v-img>
+                    <v-card-text class="text-body-1 py-0 mt-1">
+                        {{ image.description }}
+                    </v-card-text>
+                    <v-card-actions class="justify-space-between">
+                      <div class="caption mr-2">Generated {{ image.created_at | pretty_timestamp_epoch }}</div>
+                    <v-btn
+                        text
+                        @click="dialog.value = false"
+                    >Close</v-btn>
+                    </v-card-actions>
+                </v-card>
+                </template>
+            </v-dialog>
+            
+            <v-card-text>
+              <div>{{ image.description }}</div>
+              <v-chip label small class="mt-2">{{ image.model }}</v-chip>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+  </v-container>
+      </v-main>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script>
+    let pretty_timestamp_options = {
+        year: "numeric", month: "short",
+        day: "numeric", hour: "numeric", minute: "2-digit"
+    }
+   
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data: {
+        images: []
+      },
+      filters: {
+        pretty_timestamp_epoch: function (date) {
+          // takes in '1577584719' then returns "Monday, Jun 18, 2018, 7:44 PM"
+          d = new Date(0);
+          d.setUTCSeconds(date);
+          formatted_date = d.toLocaleTimeString("en-us", pretty_timestamp_options);
+          return formatted_date;
+        }
+      },
+      mounted() {
+        fetch('/data.json').then((response) => response.json()).then((data) => this.images = data.images );
+      }
+    })
+  </script>
+</body>
+</html>
